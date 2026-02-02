@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Surprise</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #ffebee;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .container {
+            z-index: 1;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+            width: 80%;
+        }
+        h1 { color: #d32f2f; font-size: 1.8rem; margin-bottom: 30px; }
+        .buttons { position: relative; height: 60px; }
+        button {
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            position: absolute;
+            transition: 0.1s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #yesBtn {
+            background-color: #ff4081;
+            color: white;
+            left: 50%;
+            transform: translateX(-110%);
+        }
+        #noBtn {
+            background-color: #9e9e9e;
+            color: white;
+            left: 50%;
+            transform: translateX(10%);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="heartCanvas"></canvas>
+
+    <div class="container">
+        <h1 id="question">Will you be my Valentine? ❤️</h1>
+        <div class="buttons">
+            <button id="yesBtn" onclick="celebrate()">Yes</button>
+            <button id="noBtn" onmouseover="moveButton()" onclick="moveButton()">No</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        let hearts = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Heart {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 20;
+                this.size = Math.random() * 15 + 10;
+                this.speed = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.amplitude = Math.random() * 50 + 20;
+                this.offset = Math.random() * 100;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(211, 47, 47, ${this.opacity})`;
+                ctx.beginPath();
+                const topCurveHeight = this.size * 0.3;
+                ctx.moveTo(this.x, this.y + topCurveHeight);
+                ctx.bezierCurveTo(this.x, this.y, this.x - this.size / 2, this.y, this.x - this.size / 2, this.y + topCurveHeight);
+                ctx.bezierCurveTo(this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + this.size);
+                ctx.bezierCurveTo(this.x, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + topCurveHeight);
+                ctx.bezierCurveTo(this.x + this.size / 2, this.y, this.x, this.y, this.x, this.y + topCurveHeight);
+                ctx.fill();
+            }
+            update() {
+                this.y -= this.speed;
+                this.x += Math.sin(this.y / this.amplitude + this.offset) * 1;
+                if (this.y < -20) this.reset();
+            }
+        }
+
+        for (let i = 0; i < 25; i++) {
+            hearts.push(new Heart());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach(h => { h.update(); h.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function moveButton() {
+            const noBtn = document.getElementById('noBtn');
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 50);
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+            noBtn.style.transform = 'none'; 
+        }
+
+        function celebrate() {
+            document.getElementById('question').innerHTML = "I knew you'd say yes! 🥰✨";
+            document.getElementById('noBtn').style.display = 'none';
+            const yesBtn = document.getElementById('yesBtn');
+            yesBtn.style.left = '50%';
+            yesBtn.style.transform = 'translateX(-50%) scale(1.5)';
+            // Make hearts go faster/more colorful
+            hearts.forEach(h => { h.speed *= 3; h.opacity = 1; });
+        }
+    </script>
+</body>
+</html>
